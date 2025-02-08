@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection with Flask</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-container {
+            overflow: hidden; /* Ensures the container wraps around the floated items */
+            display: flex;
+            z-index: 1;
+        }
+
+        .form-item {
+            float: left;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            height: 360px;
+        }
+
+        .form-item:first-child {
+            margin-right: 40px; /* Adds a 20px gap to the right of the first form */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .update-class-name {
+            width: 93%;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .update-label {
+            display: none;
+        }
+
+        .other-notice {
+            display: none;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .update-button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .update-button:hover {
+            background-color: #45a049;
+        }
+
+        .detection-button {
+            position: relative;
+            top: 134px;
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .detection-button:hover {
+            background-color: #45a049;
+        }
+
+        output {
+            display: block;
+            margin-top: 10px;
+            color: #888;
+        }
+
+        .container{
+            display: none;
+            position: absolute;
+            top: 620px;
+            z-index: 2;
+            width: 40px;
+            margin: 70px auto;
+        }
+        .dot{
+            width: 10px;
+            height: 10px;	
+            display: inline-block;
+            border-radius: 50%;
+            
+        }
+        .dot1{
+            background-color: #1abc9c;
+            animation: jump-up 0.6s 0.1s linear infinite;
+        }
+        .dot2{
+            background-color: #ffd64a;
+            animation: jump-up 0.6s 0.2s linear infinite;
+        }
+        .dot3{
+            background-color: #e067af;
+            animation: jump-up 0.6s 0.3s linear infinite;
+        }
+
+        @Keyframes jump-up{
+            50%{
+                transform: translate(0,15px);
+            }
+        }
+    </style>
+</head>
+<!-- <body>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <h1>Copyright Detection Demo</h1>
+        <label for="file">Upload an Image:</label>
+        <input type="file" name="file" accept=".png, .jpg, .jpeg" required>
+        <button type="submit">Run Detection</button>
+    </form>
+</body> -->
+<body>
+    <div class="form-container">
+        <div class="form-item">
+            <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="showContainer()">
+                <h1>Copyright Detection Demo</h1>
+                <label class="detection-label" for="files">Upload Image(s):</label>
+                <input class="detection-files" type="file" name="files[]" id="files" accept=".png, .jpg, .jpeg" multiple required>
+
+                <button class="detection-button" type="submit">Run Detection</button>
+            </form>
+        </div>
+
+        <div class="form-item">
+            <form action="/update" method="post" enctype="multipart/form-data" onsubmit="showContainer()">
+                <h1>Update Vector Stores With New Images</h1>
+                <select name="dropdown-value" id="myDropdown">
+                    <option value="">Select celebrity</option>
+                    <option value="Taylor Swift">Taylor Swift</option>
+                    <option value="Lady Gaga">Lady Gaga</option>
+                    <option value="Bob">Bob</option>
+                    <option value="Tupac">Tupac</option>
+                    <option value="Other">Other</option>
+                    <!-- Other options -->
+                </select>
+                <label class="other-notice" id="other-notice">For new class, at least 5 images are required.</label>
+                <label class="update-label" id="update-label" for="update-class-name">New class name:</label>
+                <input class="update-class-name" id="update-class-name" type="text" name="classname">
+
+                <label for="files">Upload Image(s):</label>
+                <input type="file" name="files[]" id="files_update" accept=".png, .jpg, .jpeg" multiple required>
+
+                <button class="update-button" type="submit">Upload</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container" id="container" style="display: none;">
+        <div class="dot dot1"></div>
+        <div class="dot dot2"></div>
+        <div class="dot dot3"></div>
+    </div>
+    
+    <script>
+        function showContainer() {
+            const container = document.getElementById('container');
+            container.style.display = 'block';
+        }
+
+        document.getElementById('myDropdown').addEventListener('change', function() {
+            var updateLabel = document.getElementById("update-label");
+            var updateText = document.getElementById("update-class-name");
+            var otherNotice = document.getElementById("other-notice");
+
+            if (this.value === 'Other') {
+                updateLabel.style.display = 'block'; // Show the input box
+                updateText.style.display = 'block';
+                otherNotice.style.display = 'block';
+
+            } else {
+                updateLabel.style.display = 'none'; // Hide the input box
+                updateText.style.display = 'none'; // Hide the input box
+                otherNotice.style.display = 'none'; // Hide the input box
+            }
+        });
+    </script>
+</body>
+</html>

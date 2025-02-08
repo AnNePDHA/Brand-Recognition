@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detection Result</title>
+    
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* height: 100vh; */
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .result-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .image-container div {
+            margin-right: 20px; /* Adjust the margin as needed */
+            max-width: 600px; /* Set the maximum width for each image */
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            max-height: 600px; /* Set the maximum height for each image */
+        }
+
+        .result-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result-message {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .violence-detected {
+            color: red;
+        }
+
+        .no-violence-detected {
+            color: green;
+        }
+
+        .detected-text {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .text-violence {
+            color: red;
+            font-weight: bold;
+        }
+
+        .no-text-violence {
+            color: green;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: fit-content;
+            height: fit-content;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .wrapper {
+            display: block;
+            text-align: center;
+        }
+
+        pre {
+            display: block;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- <h2>Face Recognition Results</h2>
+    {% if results %}
+        {% for i in range(0, results|length, 5) %}
+            <p>Bounding Box: {{ results[i:i+4] }}</p>
+            <p>Recognition Result: {{ results[i+4] }}</p>
+        {% endfor %}
+    {% else %}
+        <p>No face recognition results found.</p>
+    {% endif %}
+
+    <div>
+        <h3>Result Image</h3>
+        <img src="data:image/png;base64,{{ result_image|safe }}" alt="Result Image">
+    </div> -->
+    {% for result_image in result_images %}
+        <div>
+            <h2>Image {{ loop.index }}</h2>
+            <img src="data:image/png;base64,{{ result_image }}" alt="Result Image {{ loop.index }}">
+        </div>
+
+        <div class="wrapper">
+            <pre>*Green box represents logo detection, red box represents celebrities detection,</pre>
+            <pre>white box represents videogame/cartoon character detection.*</pre>
+            <pre>Note: For the full list of celebrities/characters/logos/keywords, please check the excel file.</pre>
+<!--            <pre>Note: Currently, our model only supports detection of 4 celebrities:</pre>-->
+<!--            <pre>Bob, Taylor Swift, Lady Gaga and Tupac.</pre>-->
+<!--            <pre>As for text detection, our model currently checks for these keywords:</pre>-->
+<!--            <pre>"Taylor Swift", "Swiftie", "Swifties", "1989 Taylor's Version", "Taylor's Version 1989" and "The Eras Tour"</pre>-->
+<!--            <pre>Our model will detect the logos from these companies/products:</pre>-->
+<!--            <pre>Apple, Instagram, Pepsi, Spotify, Adidas, Nike, Meta, McDonald</pre>-->
+<!--            <pre>For videogame/cartoon characters, our model can currently detect the following character(s):</pre>-->
+<!--            <pre>Mario, Peach princess, Gru (Minion), Hiccup (How to train a dragon),</pre>-->
+<!--            <pre>Joy (Inside out), Disgust (Inside out), Anger (Inside out), Sad (Inside out),</pre>-->
+<!--            <pre>Doraemon, Nobita, Miguel (Coco), Hector (Coco), Mickey, SpongeBob,</pre>-->
+<!--            <pre>Betty Boop, Russel (Up), Carl Fredricksen (Up), Woody (Toy story)</pre>-->
+            <pre> </pre>
+            <pre>Celebrities Detection: {{ all_results[loop.index - 1] }}</pre>
+            <pre>Logo detecion: {{ logo_bool_results[loop.index - 1] }}</pre>
+<!--            {% if logo_bool_results[loop.index - 1] %}-->
+<!--                <pre>Logo detected: Yes</pre>-->
+<!--            {% else %}-->
+<!--                <pre>Logo detected: No</pre>-->
+<!--            {% endif %}-->
+            <!-- <pre>{{ logo_bool_results[loop.index - 1] }}</pre> -->
+<!--            <pre>All text in image: {{ text_results[loop.index - 1] }}</pre>-->
+<!--            <pre>All text in image:</pre>-->
+<!--            {% for line in text_results[loop.index - 1] %}-->
+<!--                <pre>{{line}}</pre>-->
+<!--            {% endfor %}-->
+
+            <pre>Keywords detection: {{ taylor_in_text[loop.index - 1] }}</pre>
+            <pre>Videogame/cartoon character detection: {{ animation[loop.index - 1] }}</pre>
+            <pre>Image matching: {{ image_matching[loop.index - 1] }}</pre>
+            
+            <!-- {% if taylor_in_text[loop.index - 1] %}
+                <pre>Is there Taylor Swift in text: Yes</pre>
+            {% else %}
+                <pre>Is there Taylor Swift in text: No</pre>
+            {% endif %} -->
+            <!-- Additional information or results for each image can be displayed here -->
+        </div>
+    {% endfor %}
+
+    <!-- <pre>{{ all_results | safe }}</pre>
+    <pre>{{ text_results | safe }}</pre> -->
+
+    <script>
+        function redirectToGoogle() {
+          window.location.href = "http://20.64.87.33:5000/";
+        //   window.location.href = "http://20.64.87.33:5000/";
+        }
+    </script>
+
+    <button onclick="redirectToGoogle()">Add other images</button>
+</body>
+</html>
